@@ -6,7 +6,8 @@
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-  <h1 id="title">Museum Ticket Chatbot</h1>
+  <h1 id="title">🏛️ Museum Ticket Chatbot</h1>
+
   <div id="lang-selector">
     <label for="lang">Language / भाषा:</label>
     <select id="lang">
@@ -15,8 +16,11 @@
     </select>
   </div>
 
-  <div id="chat" class="chat-box">
-    <!-- Simple chatbot messages will be appended here -->
+  <div id="chat" class="chat-box"></div>
+
+  <div id="input-area">
+    <input type="text" id="user-input" placeholder="Type your reply here..." />
+    <button id="send-btn">Send</button>
   </div>
 
   <script src="renderer.js"></script>

@@ -1,28 +1,45 @@
-// renderer.js – simple chatbot UI logic
+// renderer.js – Chatbot UI logic with FastAPI backend integration
 
-// i18n strings for English and Hindi
+// i18n strings
 const i18n = {
   en: {
-    welcome: 'Welcome! I can help you book a museum ticket.',
-    askDate: 'Please select a date (YYYY-MM-DD):',
-    askTime: 'Select a time slot (e.g., 10:00 AM):',
-    askName: 'Your name:',
-    confirm: 'Booking confirmed! 🎉',
-    payment: 'Processing mock payment... ✅',
+    welcome:    'Welcome to the Museum Ticket Booking System! 🏛️',
+    askDate:    'Please enter the visit date (e.g., 2025-12-25):',
+    askTime:    'Choose a time slot (e.g., 10:00 AM, 12:00 PM, 2:00 PM):',
+    askName:    'Enter your full name:',
+    askType:    'Choose ticket type – Adult, Child, or Senior:',
+    processing: '⏳ Processing your booking...',
+    payment:    '💳 Mock payment processed successfully! ✅',
+    confirm:    (id) => `🎉 Booking confirmed! Your ticket ID is #${id}. Enjoy your visit!`,
+    error:      '❌ Something went wrong. Please try again.',
+    restart:    'Type anything to start a new booking.',
+    placeholder:'Type your reply here...',
   },
   hi: {
-    welcome: 'स्वागत है! मैं आपके लिए संग्रहालय टिकट बुक कर सकता हूँ।',
-    askDate: 'कृपया एक तिथि चुनें (YYYY-MM-DD):',
-    askTime: 'समय स्लॉट चुनें (उदा., 10:00 AM):',
-    askName: 'आपका नाम:',
-    confirm: 'बुकिंग पुष्टि हुई! 🎉',
-    payment: 'नकली भुगतान प्रक्रिया चल रही है... ✅',
+    welcome:    'संग्रहालय टिकट बुकिंग प्रणाली में आपका स्वागत है! 🏛️',
+    askDate:    'कृपया यात्रा की तारीख दर्ज करें (जैसे 2025-12-25):',
+    askTime:    'समय स्लॉट चुनें (जैसे 10:00 AM, 12:00 PM, 2:00 PM):',
+    askName:    'अपना पूरा नाम दर्ज करें:',
+    askType:    'टिकट प्रकार चुनें – वयस्क, बच्चा, या वरिष्ठ:',
+    processing: '⏳ आपकी बुकिंग प्रक्रिया हो रही है...',
+    payment:    '💳 नकली भुगतान सफलतापूर्वक प्रक्रिया हुई! ✅',
+    confirm:    (id) => `🎉 बुकिंग की पुष्टि हुई! आपका टिकट ID #${id} है। आपकी यात्रा शुभ हो!`,
+    error:      '❌ कुछ गलत हो गया। कृपया पुनः प्रयास करें।',
+    restart:    'नई बुकिंग शुरू करने के लिए कुछ टाइप करें।',
+    placeholder:'यहाँ अपना जवाब टाइप करें...',
   },
 };
 
-let currentLang = 'en';
-const chatBox = document.getElementById('chat');
+let lang = 'en';
+let step = 0;
+let booking = {};
+
+const chatBox   = document.getElementById('chat');
+const input     = document.getElementById('user-input');
+const sendBtn   = document.getElementById('send-btn');
 const langSelect = document.getElementById('lang');
+
+// ── Helpers ──────────────────────────────────────────────────────────────────
 
 function addMessage(text, sender = 'bot') {
   const msg = document.createElement('div');
@@ -32,75 +49,94 @@ function addMessage(text, sender = 'bot') {
   chatBox.scrollTop = chatBox.scrollHeight;
 }
 
-function botSpeak(key) {
-  const msg = i18n[currentLang][key];
-  if (msg) addMessage(msg, 'bot');
+function botSay(key, ...args) {
+  const val = i18n[lang][key];
+  addMessage(typeof val === 'function' ? val(...args) : val, 'bot');
 }
 
-// Simple state machine for the mock booking flow
-let step = 0;
-let booking = {};
+function setPlaceholder() {
+  input.placeholder = i18n[lang].placeholder;
+}
 
-function handleUserInput(input) {
-  addMessage(input, 'user');
+// ── Booking flow ──────────────────────────────────────────────────────────────
+
+async function handleInput(text) {
+  text = text.trim();
+  if (!text) return;
+
+  addMessage(text, 'user');
+  input.value = '';
+
   switch (step) {
-    case 0:
-      booking.date = input.trim();
+    case 0: // ask date
+      booking.date = text;
       step++;
-      botSpeak('askTime');
+      botSay('askTime');
       break;
-    case 1:
-      booking.time = input.trim();
+
+    case 1: // ask time
+      booking.time = text;
       step++;
-      botSpeak('askName');
+      botSay('askName');
       break;
-    case 2:
-      booking.name = input.trim();
+
+    case 2: // ask name
+      booking.name = text;
       step++;
-      botSpeak('payment');
-      // mock async payment
-      setTimeout(() => {
-        botSpeak('confirm');
-        // Reset for next booking
-        step = 0;
-        booking = {};
-        botSpeak('welcome');
-      }, 1000);
+      botSay('askType');
       break;
+
+    case 3: // ask ticket type → submit
+      booking.ticket_type = text;
+      booking.price = booking.ticket_type.toLowerCase() === 'child' ? 50 : 100;
+      booking.payment_status = 'paid';
+
+      botSay('processing');
+
+      // Call FastAPI backend via preload bridge
+      const result = await window.api.bookTicket(booking);
+
+      if (result.error) {
+        botSay('error');
+      } else {
+        botSay('payment');
+        setTimeout(() => {
+          botSay('confirm', result.id);
+          setTimeout(() => {
+            botSay('restart');
+            step = 0;
+            booking = {};
+          }, 1000);
+        }, 1000);
+      }
+      break;
+
     default:
-      botSpeak('welcome');
       step = 0;
+      booking = {};
+      startFlow();
   }
 }
 
-// Listen for user input via prompt (quick implementation)
-function askNextQuestion() {
-  const promptText = {
-    en: 'Your reply:',
-    hi: 'आपका जवाब:',
-  }[currentLang];
-  const reply = window.prompt(promptText);
-  if (reply !== null) {
-    handleUserInput(reply);
-  }
-}
-
-// Init UI
-function init() {
-  botSpeak('welcome');
-  botSpeak('askDate');
-  askNextQuestion();
-}
-
-// Language switch handler
-langSelect.addEventListener('change', (e) => {
-  currentLang = e.target.value;
-  // Clear chat and restart
+function startFlow() {
   chatBox.innerHTML = '';
   step = 0;
   booking = {};
-  init();
+  botSay('welcome');
+  botSay('askDate');
+}
+
+// ── Event listeners ───────────────────────────────────────────────────────────
+
+sendBtn.addEventListener('click', () => handleInput(input.value));
+input.addEventListener('keydown', (e) => { if (e.key === 'Enter') handleInput(input.value); });
+
+langSelect.addEventListener('change', (e) => {
+  lang = e.target.value;
+  setPlaceholder();
+  startFlow();
 });
 
-// Start the flow
-init();
+// ── Init ──────────────────────────────────────────────────────────────────────
+setPlaceholder();
+startFlow();
