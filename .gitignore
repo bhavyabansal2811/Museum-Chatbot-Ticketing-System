@@ -1,0 +1,18 @@
+node_modules/
+.env
+.venv/
+venv/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+build/
+Dist/
+/dist/
+.DS_Store
+.idea/
+.vscode/
+# Electron/Forge output
+out/
+release/
+/*.log
