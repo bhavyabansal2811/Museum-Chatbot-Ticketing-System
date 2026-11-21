@@ -1,0 +1,33 @@
+{
+  "name": "museum-chatbot-ticketing-system",
+  "version": "0.1.0",
+  "description": "A simple Electron desktop chatbot for museum ticket booking",
+  "main": "electron/main.js",
+  "scripts": {
+    "start": "electron-forge start",
+    "package": "electron-forge make",
+    "publish": "electron-forge publish",
+    "make": "electron-forge make"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "MIT",
+  "config": {
+    "forge": {
+      "packagerConfig": {},
+      "makers": [
+        {
+          "name": "@electron-forge/maker-zip",
+          "platforms": ["darwin", "win32", "linux"]
+        }
+      ]
+    }
+  },
+  "dependencies": {
+    "electron": "^30.0.0"
+  },
+  "devDependencies": {
+    "@electron-forge/cli": "^7.3.0",
+    "@electron-forge/maker-zip": "^7.3.0"
+  }
+}
