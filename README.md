@@ -1,120 +1,82 @@
 # Museum‑Chatbot‑Ticketing‑System
 
-## Overview
-A multilingual desktop chatbot that lets museum visitors book tickets, pay for them, and receive instant confirmations—all from a single Electron‑based application. The system removes long queues, eliminates manual entry errors, and captures booking data for later```markdown
-# Museum‑Chatbot‑Ticketing‑System
+![CI/CD Pipeline](https://github.com/bhavyabansal2811/Museum-Chatbot-Ticketing-System/actions/workflows/ci.yml/badge.svg)
+![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)
+![Version](https://img.shields.io/badge/version-1.0.0-green.svg)
+![Platform](https://img.shields.io/badge/platform-Windows%20%7C%20macOS%20%7C%20Linux-lightgrey.svg)
 
 ## Overview
 A multilingual desktop chatbot that lets museum visitors book tickets, pay for them, and receive instant confirmations—all from a single Electron‑based application. The system removes long queues, eliminates manual entry errors, and captures booking data for later analysis.
 
 ## Features
-| Category          | Details |
-|-------------------|---------|
+| Category | Details |
+|----------|---------|
 | **Instant Booking** | Users pick a date, time‑slot, and ticket type through a conversational UI. |
-| **Multilingual** | Built‑in language selector (English + additional languages). |
-| **Payment Automation** | Integrates a payment gateway (e.g., Stripe, Razorpay) so the flow is fully hands‑free. |
-| **Analytics** | Stores each transaction in a local database; dashboards can show daily sales, visitor demographics, etc. |
-| **Desktop‑First** | Runs as a native‑looking desktop app on Windows/macOS/Linux via Electron. |
-| **Error‑Free** | Atomic booking + payment transaction prevents double‑booking and lost records. |
-| **Scalable** | Backend API can handle many concurrent users; the Electron front‑end remains lightweight. |
+| **Multilingual** | Built‑in language selector (English + Hindi). |
+| **Mock Payment** | Simulates payment flow with instant confirmation and unique ticket ID. |
+| **Analytics CLI** | Stores each transaction in SQLite; admin script shows daily sales and revenue. |
+| **Desktop‑First** | Runs as a native desktop app on Windows/macOS/Linux via Electron. |
+| **Input Validation** | Validates date format, name length, and ticket category with error toasts. |
+| **Modular Backend** | FastAPI with clean separation of models, router, database, and config layers. |
+| **Tested & CI/CD** | Unit tests (pytest + Jest) run automatically on every push via GitHub Actions. |
 
 ## Tech Stack
-| Layer | Technology (you already know) |
-|-------|--------------------------------|
-| **Desktop UI** | **Electron** (Node.js + Chromium) |
-| **Backend API** | **FastAPI** (Python) – exposes endpoints for creating tickets, processing payments, and fetching analytics |
-| **Runtime** | **Node.js** (for Electron) |
-| **Language** | **JavaScript / TypeScript** (client side) |
-| **Database** | **SQLite** (file‑based DB; no extra server needed) |
-| **Styling** | HTML + CSS (standard web stack) |
+| Layer | Technology |
+|-------|-----------|
+| **Desktop UI** | Electron.js (Node.js + Chromium) |
+| **Backend API** | FastAPI (Python) |
+| **Database** | SQLite (file‑based, no server needed) |
+| **Language** | JavaScript (frontend), Python (backend) |
+| **Testing** | pytest (backend), Jest (frontend) |
+| **CI/CD** | GitHub Actions |
 
-*You can swap the payment provider or add more languages later without changing the core stack.*
+## Quick Start
 
-## Getting Started
-
-### 1️⃣ Clone the repository
-```bash
-git clone https://github.com/<your‑username>/Museum-Chatbot-Ticketing-System.git
-cd Museum-Chatbot-Ticketing-System
-```
-
-### 2️⃣ Set up the **backend** (FastAPI)
+See [docs/quick-start.md](docs/quick-start.md) for the full setup guide.
 
 ```bash
-# Python virtual environment
-python -m venv venv
-source venv/bin/activate      # Windows: venv\Scripts\activate
+# Backend
 pip install -r requirements.txt
+uvicorn src.server:app --reload
 
-# Create a .env file (do not commit it)
-cat <<EOF > .env
-BOT_TOKEN=your_chatbot_token               # e.g., Telegram bot token
-PAYMENT_KEY=your_payment_gateway_key       # e.g., Stripe secret key
-DATABASE_URL=sqlite:///data/bookings.db
-EOF
-
-# Run the FastAPI server (will listen on http://127.0.0.1:8000)
- src.server:app --reload
+# Frontend (new terminal)
+npm install && npm start
 ```
-
-> The backend now provides `/book`, `/pay`, and `/stats` endpoints that the Electron front‑end will call.
-
-### 3️⃣ Set up the **desktop client** (Electron)
-
-```bash
-# Install Node dependencies
-npm install
-
-# Start the Electron app (it will launch a window and talk to the FastAPI server)
-npm start
-```
-
-If you prefer a production build:
-
-```bash
-npm run build   # creates a packaged app for your OS
-```
-
-### 4️⃣ Test a booking flow
-1. Open the Electron window.  
-2. The chatbot greets you and asks for a language.  
-3. Choose a date, time‑slot, and ticket quantity.  
-4. Proceed to payment – the app redirects to the configured gateway and then returns a confirmation message.  
-5. Check `data/bookings.db` (or open the analytics dashboard via the app) to see the recorded transaction.
 
 ## Project Structure
-
+```
 Museum-Chatbot-Ticketing-System/
-│
-├─ .gitignore
-├─ README.md
-├─ LICENSE
-├─ requirements.txt          # Python dependencies (fastapi, uvicorn, pydantic, etc.)
-├─ package.json              # Node/Electron dependencies
-├─ .env                      # runtime secrets (not committed)
-│
-├─ data/                     # SQLite DB file lives here (git‑ignored)
-│
-├─ src/                      # Python backend
-│   ├─ init.py
-│   ├─ server.py             # FastAPI app + routes
-│   └─ models.py             # Pydantic models for tickets, payments, etc.
-│
-├─ electron/                 # Electron front‑end
-│   ├─ main.js               # creates BrowserWindow
-│   ├─ preload.js            # contextBridge API for renderer
-│   ├─ renderer/
-│   │   ├─ index.html
-│   │   ├─ style.css
-│   │   └─ renderer.js       # UI logic, calls backend API
-│   └─ assets/               # icons, images
-│
-├─ tests/                    # unit / integration tests (Python & JS)
-│   ├─ test_backend.py
-│   └─ test_renderer.js
-└─ docs/                     # design notes, flowcharts, API spec
+├── electron/              # Electron desktop app
+│   ├── main.js            # Main process
+│   ├── preload.js         # Secure contextBridge
+│   └── renderer/          # UI (HTML, CSS, JS)
+├── src/                   # FastAPI backend
+│   ├── server.py          # App entry + CORS
+│   ├── router.py          # API endpoints
+│   ├── models.py          # Pydantic schemas
+│   ├── database.py        # SQLite helpers
+│   ├── config.py          # .env loader
+│   └── stats.py           # Admin analytics CLI
+├── tests/                 # Test suites
+│   ├── test_backend.py    # pytest API tests
+│   └── test_renderer.js   # Jest UI tests
+├── docs/                  # Documentation
+│   ├── architecture.md    # System design diagram
+│   ├── api_spec.md        # REST API reference
+│   └── quick-start.md     # Setup guide
+├── .github/workflows/     # GitHub Actions CI/CD
+├── requirements.txt       # Python dependencies
+├── package.json           # Node dependencies
+└── .env.example           # Sample config
+```
+
+## Documentation
+- [Architecture Diagram](docs/architecture.md)
+- [API Specification](docs/api_spec.md)
+- [Quick Start Guide](docs/quick-start.md)
 
 ## License
 This project is released under the **MIT License**. See the `LICENSE` file for full terms.
----  
-*Developed for myself for a real project i worked on and developed myself.*
+
+---
+*Developed by Bhavya Bansal*

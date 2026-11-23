@@ -1,6 +1,6 @@
 {
   "name": "museum-chatbot-ticketing-system",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "description": "A simple Electron desktop chatbot for museum ticket booking",
   "main": "electron/main.js",
   "scripts": {
