@@ -27,3 +27,15 @@ async def create_ticket(ticket: TicketCreate):
 @router.get("/tickets", response_model=List[dict])
 async def get_tickets():
     return db.list_tickets()
+
+@router.delete("/tickets/{ticket_id}")
+async def delete_ticket(ticket_id: int):
+    success = db.delete_ticket(ticket_id)
+    if not success:
+        raise HTTPException(status_code=404, detail="Ticket not found")
+    return {"status": "deleted", "id": ticket_id}
+
+@router.delete("/tickets")
+async def clear_all_tickets():
+    deleted_count = db.clear_all_tickets()
+    return {"status": "cleared", "count": deleted_count}

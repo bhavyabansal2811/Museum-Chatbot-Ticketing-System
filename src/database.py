@@ -1,9 +1,7 @@
 import os
 import sqlite3
 from datetime import datetime
-
-# Load database path from environment or default to ./data/tickets.db
-DB_PATH = os.getenv('DB_PATH', os.path.join(os.path.dirname(__file__), '..', 'data', 'tickets.db'))
+from src.config import DB_PATH
 
 def get_connection():
     """Return a SQLite connection with foreign keys enabled."""
@@ -46,9 +44,23 @@ def create_ticket(date: str, time: str, name: str, ticket_type: str, price: floa
 def list_tickets():
     """Return a list of all tickets as dicts."""
     with get_connection() as conn:
-        cur = conn.execute('SELECT * FROM tickets ORDER BY created_at DESC')
+        cur = conn.execute('SELECT * FROM tickets ORDER BY id DESC')
         rows = cur.fetchall()
         return [dict(row) for row in rows]
 
-# Initialize DB on module import so the table exists for the API.
+def delete_ticket(ticket_id: int) -> bool:
+    """Delete a specific ticket by its ID."""
+    with get_connection() as conn:
+        cur = conn.execute('DELETE FROM tickets WHERE id = ?', (ticket_id,))
+        conn.commit()
+        return cur.rowcount > 0
+
+def clear_all_tickets() -> int:
+    """Delete all tickets from the database."""
+    with get_connection() as conn:
+        cur = conn.execute('DELETE FROM tickets')
+        conn.commit()
+        return cur.rowcount
+
+# Initialize DB on module import
 init_db()

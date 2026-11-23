@@ -28,4 +28,30 @@ contextBridge.exposeInMainWorld('api', {
       return { error: err.message };
     }
   },
+
+  // Delete a single ticket by ID
+  deleteTicket: async (ticketId) => {
+    try {
+      const response = await fetch(`http://127.0.0.1:8000/tickets/${ticketId}`, {
+        method: 'DELETE',
+      });
+      if (!response.ok) throw new Error('Server error: ' + response.status);
+      return await response.json();
+    } catch (err) {
+      return { error: err.message };
+    }
+  },
+
+  // Clear all tickets (database reset)
+  clearAllTickets: async () => {
+    try {
+      const response = await fetch('http://127.0.0.1:8000/tickets', {
+        method: 'DELETE',
+      });
+      if (!response.ok) throw new Error('Server error: ' + response.status);
+      return await response.json();
+    } catch (err) {
+      return { error: err.message };
+    }
+  },
 });

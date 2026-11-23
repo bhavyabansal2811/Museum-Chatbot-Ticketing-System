@@ -1,4 +1,4 @@
-// renderer.js – Chatbot UI logic, FAQs, validation & Admin Dashboard
+// renderer.js – Chatbot UI logic, FAQs, validation & Admin Dashboard with Delete/Reset
 
 const i18n = {
   en: {
@@ -58,6 +58,7 @@ const toast         = document.getElementById('toast');
 const modal         = document.getElementById('dashboard-modal');
 const closeModalBtn = document.getElementById('close-modal-btn');
 const refreshDashBtn= document.getElementById('refresh-dashboard-btn');
+const clearAllBtn   = document.getElementById('clear-all-btn');
 const statTotalTix  = document.getElementById('stat-total-tickets');
 const statTotalRev  = document.getElementById('stat-total-revenue');
 const statCatSplit  = document.getElementById('stat-category-split');
@@ -241,17 +242,17 @@ function startFlow() {
 // ── Admin Dashboard Logic ─────────────────────────────────────────────────────
 
 async function loadDashboard() {
-  ticketsTbody.innerHTML = '<tr><td colspan="7" class="loading-cell">Loading real-time data from SQLite...</td></tr>';
+  ticketsTbody.innerHTML = '<tr><td colspan="8" class="loading-cell">Loading real-time data from SQLite...</td></tr>';
   
   const tickets = await window.api.getTickets();
 
   if (!tickets || tickets.error) {
-    ticketsTbody.innerHTML = `<tr><td colspan="7" class="error-cell">❌ Error loading data: ${tickets?.error || 'Backend offline'}</td></tr>`;
+    ticketsTbody.innerHTML = `<tr><td colspan="8" class="error-cell">❌ Error loading data: ${tickets?.error || 'Backend offline'}</td></tr>`;
     return;
   }
 
   if (tickets.length === 0) {
-    ticketsTbody.innerHTML = '<tr><td colspan="7" class="empty-cell">No tickets booked yet.</td></tr>';
+    ticketsTbody.innerHTML = '<tr><td colspan="8" class="empty-cell">No tickets booked yet. Database is clean.</td></tr>';
     statTotalTix.textContent = '0';
     statTotalRev.textContent = '₹0';
     statCatSplit.textContent = '0 / 0 / 0';
@@ -282,6 +283,7 @@ async function loadDashboard() {
       <td><span class="badge badge-${cat}">${t.ticket_type}</span></td>
       <td>₹${Number(t.price).toFixed(2)}</td>
       <td><span class="badge badge-paid">${t.payment_status || 'paid'}</span></td>
+      <td><button class="delete-btn" data-id="${t.id}" title="Delete this booking">🗑️ Delete</button></td>
     `;
     ticketsTbody.appendChild(tr);
   });
@@ -289,6 +291,22 @@ async function loadDashboard() {
   statTotalTix.textContent = tickets.length;
   statTotalRev.textContent = `₹${totalRev.toLocaleString('en-IN')}`;
   statCatSplit.textContent = `${adultCount} / ${childCount} / ${seniorCount}`;
+
+  // Attach individual delete button handlers
+  document.querySelectorAll('.delete-btn').forEach(btn => {
+    btn.addEventListener('click', async (e) => {
+      const id = e.target.getAttribute('data-id');
+      if (confirm(`Are you sure you want to delete Ticket #${id}?`)) {
+        const res = await window.api.deleteTicket(id);
+        if (res.error) {
+          showToast(`Error deleting ticket: ${res.error}`, true);
+        } else {
+          showToast(`Ticket #${id} deleted.`);
+          loadDashboard();
+        }
+      }
+    });
+  });
 }
 
 function escapeHtml(text) {
@@ -321,6 +339,18 @@ closeModalBtn.addEventListener('click', () => {
 refreshDashBtn.addEventListener('click', () => {
   loadDashboard();
   showToast('Dashboard refreshed');
+});
+
+clearAllBtn.addEventListener('click', async () => {
+  if (confirm('⚠️ Are you sure you want to delete ALL tickets from the database? This cannot be undone.')) {
+    const res = await window.api.clearAllTickets();
+    if (res.error) {
+      showToast(`Error clearing tickets: ${res.error}`, true);
+    } else {
+      showToast(`Cleared ${res.count} tickets from database.`);
+      loadDashboard();
+    }
+  }
 });
 
 // Close modal if user clicks outside modal-content
