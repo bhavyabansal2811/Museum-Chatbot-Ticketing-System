@@ -2,33 +2,88 @@
 * { box-sizing: border-box; margin: 0; padding: 0; }
 
 body {
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
   background: #f0f2f5;
   display: flex;
   flex-direction: column;
   align-items: center;
   height: 100vh;
   padding: 16px;
+  position: relative;
 }
 
-/* ── Title ────────────────────────────────────────── */
+/* ── Toast Notifications ─────────────────────────── */
+.toast {
+  position: fixed;
+  top: 15px;
+  padding: 8px 16px;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  font-weight: 500;
+  z-index: 1000;
+  transition: opacity 0.3s ease, transform 0.3s ease;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+
+.toast-info {
+  background: #2c3e50;
+  color: #fff;
+}
+
+.toast-error {
+  background: #e74c3c;
+  color: #fff;
+}
+
+.hidden {
+  opacity: 0;
+  transform: translateY(-20px);
+  pointer-events: none;
+}
+
+/* ── Header & Controls ────────────────────────────── */
+.header {
+  width: 100%;
+  max-width: 620px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
 h1 {
   color: #2c3e50;
-  margin-bottom: 10px;
-  font-size: 1.4rem;
+  font-size: 1.25rem;
 }
 
-/* ── Language selector ────────────────────────────── */
-#lang-selector {
-  margin-bottom: 10px;
-  font-size: 0.9rem;
+.controls {
+  display: flex;
+  align-items: center;
+  gap: 10px;
 }
 
 #lang-selector select {
-  margin-left: 6px;
-  padding: 2px 6px;
-  border-radius: 4px;
-  border: 1px solid #ccc;
+  padding: 4px 8px;
+  border-radius: 6px;
+  border: 1px solid #ccd0d5;
+  font-size: 0.85rem;
+  outline: none;
+}
+
+#reset-btn {
+  padding: 5px 10px;
+  background: #e2e8f0;
+  color: #475569;
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.85rem;
+  font-weight: 500;
+  transition: background 0.2s;
+}
+
+#reset-btn:hover {
+  background: #cbd5e1;
 }
 
 /* ── Chat box ─────────────────────────────────────── */
@@ -37,36 +92,37 @@ h1 {
   max-width: 620px;
   flex: 1;
   overflow-y: auto;
-  background: #fff;
-  border: 1px solid #ddd;
-  border-radius: 10px;
-  padding: 12px;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 14px;
   display: flex;
   flex-direction: column;
-  gap: 8px;
-  margin-bottom: 10px;
+  gap: 10px;
+  margin-bottom: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.04);
 }
 
 /* ── Messages ─────────────────────────────────────── */
 .message {
-  max-width: 75%;
-  padding: 8px 12px;
+  max-width: 78%;
+  padding: 9px 14px;
   border-radius: 16px;
-  font-size: 0.95rem;
-  line-height: 1.4;
+  font-size: 0.92rem;
+  line-height: 1.45;
   word-wrap: break-word;
 }
 
 .bot {
-  background: #e8ecf1;
-  color: #2c3e50;
+  background: #f1f5f9;
+  color: #1e293b;
   align-self: flex-start;
   border-bottom-left-radius: 4px;
 }
 
 .user {
-  background: #3498db;
-  color: #fff;
+  background: #2563eb;
+  color: #ffffff;
   align-self: flex-end;
   border-bottom-right-radius: 4px;
 }
@@ -82,26 +138,28 @@ h1 {
 #user-input {
   flex: 1;
   padding: 10px 14px;
-  border: 1px solid #ccc;
+  border: 1px solid #cbd5e1;
   border-radius: 20px;
   font-size: 0.95rem;
   outline: none;
 }
 
 #user-input:focus {
-  border-color: #3498db;
+  border-color: #2563eb;
 }
 
 #send-btn {
-  padding: 10px 20px;
-  background: #3498db;
+  padding: 10px 22px;
+  background: #2563eb;
   color: #fff;
   border: none;
   border-radius: 20px;
   cursor: pointer;
   font-size: 0.95rem;
+  font-weight: 500;
+  transition: background 0.2s;
 }
 
 #send-btn:hover {
-  background: #2980b9;
+  background: #1d4ed8;
 }
