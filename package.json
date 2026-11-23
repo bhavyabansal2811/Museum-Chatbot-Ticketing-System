@@ -4,7 +4,8 @@
   "description": "A simple Electron desktop chatbot for museum ticket booking",
   "main": "electron/main.js",
   "scripts": {
-    "start": "electron-forge start",
+    "start": "electron .",
+    "forge:start": "electron-forge start",
     "package": "electron-forge make",
     "publish": "electron-forge publish",
     "make": "electron-forge make",
@@ -38,12 +39,11 @@
       ]
     }
   },
-  "dependencies": {
-    "electron": "^30.0.0"
-  },
+  "dependencies": {},
   "devDependencies": {
     "@electron-forge/cli": "^7.3.0",
     "@electron-forge/maker-zip": "^7.3.0",
+    "electron": "^30.0.0",
     "eslint": "^8.57.0",
     "jest": "^29.7.0",
     "prettier": "^3.2.5"
